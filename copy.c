@@ -1,6 +1,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "hrd.h"
+#include "hdr.h"
 
 #ifndef BUF_SIZE /* override -DBUF_SIZE*/
 #define BUF_SIZE 500
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 	
 	while((num_read = read(input_fd, buf, BUF_SIZE)) > 0) {
 		if(write(out_fd, buf, num_read) != num_read){
-			fprintf(stderr, "cloud not write whole buffer");
+			fprintf(stderr, "cloud not write whole buffer\n");
 			return -1;
 		}
 	}
