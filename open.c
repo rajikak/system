@@ -8,8 +8,7 @@
 int main(){
 
 	const char *f = "tmp.txt";
-	int fd = open(f, O_WRONLY); 
-	/*int fd = open(f, O_EXCL | O_CREAT);*/
+	int fd = open(f, O_WRONLY); /* int fd = open(f, O_EXCL | O_CREAT); */
 	if(fd != -1) {
 		printf("[pid %ld] file %s already exists\n", (long)getpid(), f);
 		close(fd);
