@@ -1,16 +1,20 @@
 /* basic malloc() and free() for `char` type */
 #include "hdr.h"
 
-typedef struct node {
+typedef struct {
 	size_t len;
 	struct node *prev;
 	struct node *next;
 	char *buf;
 } node_t;
 
-char *malloc2(size_t size, node_t *flp){
+/* free list(list of memory free by free) */
+static node_t *flp; 
+
+char *malloc2(size_t size){
 	char *p;
-	/* build free list */
+	/* build free list, a more efficient allocator can move the 
+	 * break point in much bigger chunks than requested.*/
 	printf("program break: %10p\n", sbrk(0));
 	if (flp == NULL) {
 		node_t e;
@@ -32,18 +36,20 @@ char *malloc2(size_t size, node_t *flp){
 	printf("program break(after allocation): %10p\n", sbrk(0));
 }
 
-void free2(char *ptr, node_t *flp){
+void free2(char *ptr){
 
 }
 
 
 int main() {
 	
-	node_t *frlst = NULL;
 	char *buf1, *buf2;
 
-	buf1 = malloc2(5, frlst); /* "hello" */
-	buf2 = malloc2(5, frlst); /* "world" */
+	buf1 = malloc2(5); /* "hello" */
+	buf2 = malloc2(5); /* "world" */
+
+	printf("buf1: %10p\n", buf1);
+	printf("buf2: %10p\n", buf2);
 
 	memcpy(buf1, "hello", 5);
 	memcpy(buf2, "world", 5);
@@ -51,8 +57,8 @@ int main() {
 	printf("%s\n", buf1);
 	printf("%s\n", buf2);
 
-	free2(buf1, frlst);
-	free2(buf2, frlst);
+	free2(buf1);
+	free2(buf2);
 
 	/* seg fault, double free */
 	printf("%s\n", buf1);
