@@ -1,43 +1,80 @@
 /* basic malloc() and free() for `char` type */
 #include "hdr.h"
 
-typedef struct {
+typedef struct node {
 	size_t len;
 	struct node *prev;
 	struct node *next;
 	char *buf;
 } node_t;
 
-/* free list(list of memory free by free) */
-static node_t *flp; 
+/* head of free list(list of memory free by free) */
+static node_t *head; 
 
 char *malloc2(size_t size){
 	char *p;
 	/* build free list, a more efficient allocator can move the 
 	 * break point in much bigger chunks than requested.*/
 	printf("program break: %10p\n", sbrk(0));
-	if (flp == NULL) {
+	if (head == NULL) {
 		node_t e;
 		e.len  = size;
 		e.prev = NULL;
 		e.next = NULL;
-		p = (char *)sbrk(size + 1); /* extra byte for '\0' */
 
+		p = (char *)sbrk(size + 1); /* extra byte for '\0' */
 		if (p == (char *) -1) {
 			fprintf(stderr, "sbrk failed, errno=%d\n", errno);
 			return NULL;
 		}
 		e.buf = p;
+		head = &e;
+
+		printf("break now    : %10p\n", sbrk(0));
 		return e.buf;
 		
 	} else {
+		/* best fit allocator */
+		node_t *tmp = head;
+		while(tmp != NULL) {
 
+			if(tmp->len > size) {
+				tmp->prev->next = tmp->next;
+				tmp->next->prev = tmp->prev;
+				printf("program break(after allocation-best fit): %10p\n", sbrk(0));
+				return tmp;
+			}	
+
+			tmp = tmp->next;		
+		}
+
+		node_t e;
+		e.len = size;
+		e.prev = head->next;
+		e.next = NULL; /* tail */
+		p = (char *)sbrk(size + 1);
+		if ( p == (char *) -1) {
+			fprintf(stderr, "sbrk failed, errono=%d\n", errno);
+			return NULL;
+		}
+
+		e.buf = p;
+		tmp->next = &e;
+
+		printf("program break(after allocation): %10p\n", sbrk(0));
+		return e.buf;
 	}
-	printf("program break(after allocation): %10p\n", sbrk(0));
 }
 
 void free2(char *ptr){
+	node_t *tmp = head;
 
+	/* double free is seg fault */
+	while(tmp != NULL) {
+		tmp->next = 		
+
+		tmp = tmp->next;
+	}
 }
 
 
@@ -53,9 +90,6 @@ int main() {
 
 	memcpy(buf1, "hello", 5);
 	memcpy(buf2, "world", 5);
-
-	printf("%s\n", buf1);
-	printf("%s\n", buf2);
 
 	free2(buf1);
 	free2(buf2);
