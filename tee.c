@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		if(write(out_fd, buf, sizeof(buf)) == -1) {
-			fprintf(stderr, "cloud not write whole buffer\n");
+			fprintf(stderr, "could not write whole buffer\n");
 			return -1;
 		}
 		printf("%s", buf);
